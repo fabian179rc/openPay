@@ -3,7 +3,7 @@ const openpay = require("../openpay");
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
+router.get("/", (req, res, next) => {
   try {
     openpay.customers.list(function (error, customer) {
       if (error) {
@@ -13,13 +13,14 @@ router.get("/", (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", (req, res, next) => {
   const customerId = req.params.id;
   try {
+    if (!customerId) return res.status(400).send("CustomerId Required");
     openpay.customers.get(customerId, function (error, customer) {
       if (error) {
         res.status(400).json({ message: error.description });
@@ -28,11 +29,11 @@ router.get("/:id", (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 });
 
-router.post("/", (req, res) => {
+router.post("/", (req, res, next) => {
   const {
     external_id,
     name,
@@ -45,7 +46,7 @@ router.post("/", (req, res) => {
 
   try {
     if (!name || !email)
-      return res.status(400).send("Field name and email required"); //validacion aparte
+      return res.status(400).send("Field name and email required");
 
     openpay.customers.create(
       {
@@ -59,7 +60,6 @@ router.post("/", (req, res) => {
       },
       function (error, customer) {
         if (error) {
-          console.log(error);
           res.status(400).json({ message: error.description });
         } else {
           res.status(201).json(customer);
@@ -67,11 +67,11 @@ router.post("/", (req, res) => {
       }
     );
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id", (req, res, next) => {
   const customerId = req.params.id;
   const {
     external_id,
@@ -84,9 +84,9 @@ router.put("/:id", (req, res) => {
   } = req.body;
 
   try {
+    if (!customerId) return res.status(400).send("CustomerId Required");
     if (!name || !email)
-      return res.status(400).send("Field name and email required"); //validacion aparte
-
+      return res.status(400).send("Field name and email required");
     const customerRequest = {
       external_id,
       name,
@@ -109,13 +109,14 @@ router.put("/:id", (req, res) => {
       }
     );
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", (req, res, next) => {
   const customerId = req.params.id;
   try {
+    if (!customerId) return res.status(400).send("CustomerId Required");
     openpay.customers.delete(customerId, function (error) {
       if (error) {
         res.status(400).json({ message: error.description });
@@ -124,8 +125,7 @@ router.delete("/:id", (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 });
-//manejo de errores centralizado con next
 module.exports = router;

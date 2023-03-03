@@ -33,7 +33,7 @@ Validacion de datos de entrada en Endpoints(Solo campos "Required" que figuran e
 Proteccion de rutas con JWT.
 
 
-Generacion de Token en ruta /login enviando por ejemplo:
+Generacion de Token en ruta http://localhost:3000/login enviando por ejemplo:
 
 {"username": "admin",
     "password": "admin"}

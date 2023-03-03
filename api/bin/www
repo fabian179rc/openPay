@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 const sequelize = require("../database.js");
+const Address = require("../models/address");
+const Customer = require("../models/customer");
+const Charge = require("../models/charge");
 /**
  * Module dependencies.
  */
@@ -32,6 +35,10 @@ sequelize.sync({ force: true }).then(async () => {
   server.on("listening", onListening);
 });
 
+//Create board
+Customer.sync();
+Address.sync();
+Charge.sync();
 /**
  * Normalize a port into a number, string, or false.
  */

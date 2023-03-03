@@ -1,7 +1,8 @@
 const express = require("express");
 const openpay = require("../openpay");
-
 const router = express.Router();
+const Customer = require("../models/customer");
+const Address = require("../models/address");
 
 router.get("/", (req, res, next) => {
   try {
@@ -33,20 +34,13 @@ router.get("/:id", (req, res, next) => {
   }
 });
 
-router.post("/", (req, res, next) => {
-  const {
-    external_id,
-    name,
-    last_name,
-    email,
-    requires_account,
-    phone_number,
-    address,
-  } = req.body;
+router.post("/", async (req, res, next) => {
+  const { external_id, name, last_name, email, phone_number, address } =
+    req.body;
 
   try {
-    if (!name || !email)
-      return res.status(400).send("Field name and email required");
+    if (!name || !email || !address)
+      return res.status(400).send("Field name, email and address required");
 
     openpay.customers.create(
       {
@@ -54,15 +48,28 @@ router.post("/", (req, res, next) => {
         name,
         last_name,
         email,
-        requires_account,
         phone_number,
         address,
       },
-      function (error, customer) {
+      async function (error, customer) {
         if (error) {
           res.status(400).json({ message: error.description });
         } else {
-          res.status(201).json(customer);
+          const createdAddress = await Address.create(customer.address);
+          const createdCustomer = await Customer.create({
+            id: customer.id,
+            creation_date: customer.creation_date,
+            external_id: customer.external_id,
+            name: customer.name,
+            last_name: customer.last_name,
+            email: customer.email,
+            phone_number: customer.phone_number,
+            status: customer.status,
+            balance: customer.balance,
+            clabe: customer.clabe,
+            addressId: createdAddress.dataValues.id,
+          });
+          res.status(201).json(createdCustomer);
         }
       }
     );

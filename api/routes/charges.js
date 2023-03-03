@@ -1,5 +1,7 @@
 const express = require("express");
 const openpay = require("../openpay");
+const Customer = require("../models/customer");
+const Charge = require("../models/charge");
 
 const router = express.Router();
 
@@ -16,10 +18,11 @@ router.post("/:id", (req, res, next) => {
     openpay.customers.charges.create(
       customerId,
       { method, amount, description, order_id, due_date },
-      function (error, charge) {
+      async function (error, charge) {
         if (error) {
           res.status(400).json({ message: error.description });
         } else {
+          await Charge.create(charge);
           res.status(201).json(charge);
         }
       }

@@ -3,7 +3,7 @@ const sequelize = require("../database");
 
 class Address extends Model {
   static associate(models) {
-    Store.belongsTo(models.User);
+    Address.belongsTo(models.Customer);
   }
 }
 

@@ -1,6 +1,5 @@
 const express = require("express");
 const openpay = require("../openpay");
-const Customer = require("../models/customer");
 const Charge = require("../models/charge");
 
 const router = express.Router();
